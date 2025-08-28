@@ -37,7 +37,7 @@
           <td th:text="${todo.title}">---</td>
           <td th:text="${#temporals.format(todo.createdAt)}">---</td>
           <td th:text="${#temporals.format(todo.deadline)}">---</td>
-          <td th:text="${#temporals.format(todo.finishedAt)}">---</td>
+          <td th:text="${#temporals.format(todo.finishedAt) ?: '-'}">---</td>
 
           <td>
             <a href="#" class="btn btn-sm btn-primary">Concluir</a>

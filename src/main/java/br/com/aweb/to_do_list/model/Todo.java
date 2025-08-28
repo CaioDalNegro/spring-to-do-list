@@ -28,7 +28,7 @@ public class Todo {
     private String title;  // Título da tarefa
 
     @Column(nullable = false)  // Define que a coluna 'createdAt' não pode ser nula
-    private LocalDateTime createdAt;  // Data e hora de criação da tarefa
+    private LocalDateTime createdAt = LocalDateTime.now();  // Data e hora de criação da tarefa
 
     @Column(nullable = false)  // Define que a coluna 'deadline' não pode ser nula
     private LocalDate deadline;  // Data limite para a conclusão da tarefa
