@@ -1,21 +1,35 @@
 package br.com.aweb.to_do_list.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import br.com.aweb.to_do_list.model.Todo;
 import br.com.aweb.to_do_list.repository.TodoRepository;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
-@Controller
-@RequestMapping("/todo")
+
+
+@Controller  // Marca a classe como um controlador no padrão MVC (Model-View-Controller).
+@RequestMapping("/todo")  // Define que todas as requisições para "/todo" serão tratadas por este controlador.
 public class TodoController {
 
-    @Autowired
+    @Autowired  // Injeta a dependência do TodoRepository, que é usado para acessar os dados de tarefas.
     TodoRepository todoRepository;
     
     // @GetMapping("/home")
@@ -34,11 +48,74 @@ public class TodoController {
     //     return modelAndView;
     // }
 
-    @GetMapping
-    public ModelAndView list(){
-        var modelAndView = new ModelAndView("list");
-        modelAndView.addObject("todos", todoRepository.findAll());
-        return modelAndView;
+    @GetMapping  // Mapeia a requisição GET para o caminho "/todo".
+    public ModelAndView list(){  // Método que retorna uma lista de tarefas.
+
+        /* 
+         1° Forma
+         - var modelAndView = new ModelAndView("list");  // Cria um ModelAndView para a página "list".
+         - modelAndView.addObject("todos", todoRepository.findAll());  // Adiciona todos os "todos" (tarefas) do repositório ao modelo.
+         - return modelAndView;  // Retorna o ModelAndView com a lista de tarefas.
+        */
+
+        /* 
+         2° Forma 
+         - return new ModelAndView("list", Map.of("todos", todoRepository.findAll()));
+        */
+
+        return new ModelAndView("list", Map.of("todos", 
+        todoRepository.findAll(Sort.by("deadline"))));
     }
 
+    // Criar ----------------------------------->
+    @GetMapping("/create")
+    public ModelAndView create() {
+        return new ModelAndView("form", Map.of("todo", new Todo()));
+    }
+
+    @PostMapping("/create")
+    public String create(@Valid Todo todo, BindingResult result) {
+        if (result.hasErrors())
+            return "form";
+        todoRepository.save(todo);
+        return "redirect:/todo";
+    }
+
+    // Editar ----------------------------------->
+    @GetMapping("/edit/{id}")
+    public ModelAndView edit(@PathVariable Long id) {
+
+        /* 
+        outra forma
+         - Optional<Todo> todo = todoRepository.findById(id);
+        */
+
+        var todo = todoRepository.findById(id);
+        if(todo.isPresent())
+            return new ModelAndView("form", Map.of("todo", todo.get()));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/edit/{id}")
+    public String edit(@Valid Todo todo, BindingResult result) {
+        if (result.hasErrors())
+            return "form";
+        todoRepository.save(todo);
+        return "redirect:/todo";
+    }
+
+    // Delete ----------------------------------->
+    @GetMapping("/delete/{id}")
+    public ModelAndView delete(@PathVariable Long id) {
+        var todo = todoRepository.findById(id);
+        if(todo.isPresent())
+            return new ModelAndView("delete", Map.of("todo", todo.get()));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/delete/{id}")
+    public String delete(Todo todo) {
+        todoRepository.delete(todo);
+        return "redirect:/todo";
+    }
 }
