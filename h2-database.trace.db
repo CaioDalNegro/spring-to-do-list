@@ -402,3 +402,6 @@ DROP TODO [42001-232]
 2025-09-03 19:10:16.513423-03:00 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]TODO"; expected "TRUNCATE"; SQL statement:
 TODO [42001-232]
+2025-09-03 22:11:30.261155-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TODO" not found (this database is empty); SQL statement:
+select t1_0.id,t1_0.created_at,t1_0.deadline,t1_0.finished_at,t1_0.title from todo t1_0 order by t1_0.deadline [42104-232]

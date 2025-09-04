@@ -1,5 +1,6 @@
 package br.com.aweb.to_do_list.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class TodoController {
         */
 
         var todo = todoRepository.findById(id);
-        if(todo.isPresent())
+        if(todo.isPresent() && todo.get().getFinishedAt() == null)
             return new ModelAndView("form", Map.of("todo", todo.get()));
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
@@ -117,5 +118,19 @@ public class TodoController {
     public String delete(Todo todo) {
         todoRepository.delete(todo);
         return "redirect:/todo";
+    }
+
+    
+    // Concluir ----------------------------------->
+    @PostMapping("/finish/{id}")
+    public String finish(@PathVariable Long id){
+        var OptionalTodo = todoRepository.findById(id);
+        if (OptionalTodo.isPresent() && OptionalTodo.get().getFinishedAt() == null) {
+            var todo = OptionalTodo.get();
+            todo.setFinishedAt(LocalDate.now());
+            todoRepository.save(todo);
+            return "redirect:/todo";
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }
